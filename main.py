@@ -23,25 +23,29 @@ HITFONT = pygame.font.SysFont('comicsans', 70)
 
 #ONI
 oni_width, oni_height = 100, 100
-YEEHA = pygame.image.load(os.path.join('projects', 'pygame', 'yata.png'))
+YEEHA = pygame.image.load(os.path.join('projects', 'Game1', 'yata.png'))
 ONI = pygame.transform.scale(YEEHA, (oni_width, oni_height))
 
 #blade aura
-blade_aura = pygame.image.load(os.path.join('projects', 'pygame', 'bladeaura.png'))
+blade_aura = pygame.image.load(os.path.join('projects', 'Game1', 'bladeaura.png'))
 aura_width, aura_height = 60, 60
 aura = pygame.transform.scale(blade_aura, (aura_width, aura_height))
 
 #enemy
-enemy = pygame.image.load(os.path.join('projects', 'pygame', '6w6.png'))
+EMEMY = pygame.image.load(os.path.join('projects', 'Game1', '6w6.png'))
+
+#background
+BG = pygame.image.load(os.path.join('projects', 'Game1', 'background.png'))
 
 
-def draw(player, bullets, enemies):
-    WINDOW.fill(BLACK)
+def draw(player, bullets, enemies, bg):
+    for d in bg:
+        WINDOW.blit(BG, (d.x, d.y))
     WINDOW.blit(ONI, (player.x, player.y))
     for i in bullets:
         WINDOW.blit(aura, (i.x, i.y))
     for _ in enemies:
-        WINDOW.blit(enemy, (_[0].x, _[0].y))
+        WINDOW.blit(EMEMY, (_[0].x, _[0].y))
     pygame.display.update()
 
 def draw_text(text, font, colour, x, y):
@@ -91,9 +95,23 @@ def colide(bullets, enemies , player):
             enemies.remove(enemy)
             pygame.event.post(pygame.event.Event(GOT_HIT))
 
+def bgmove(bgrects: list):
+    for bg in bgrects:
+        bg.y += 5
+        if bg.y > HEIGHT:
+            bgrects.remove(bg)
+    if len(bgrects) < 3:
+        y = bgrects[len(bgrects) -1].y
+        rect = pygame.Rect(0, y - BG.get_height(), BG.get_width(), BG.get_height())
+        bgrects.append(rect)
+
+def testmove(bg):
+    bg.y+=2
+
 def main():
     player = pygame.Rect(180, 400, oni_width, oni_height)
 
+    bg = [(pygame.Rect(0, 0, BG.get_width(), BG.get_height()))]
     bullets = []
     enemies = []
     clock = pygame.time.Clock()
@@ -105,7 +123,8 @@ def main():
         bulletmove(bullets)
         colide(bullets, enemies, player)
         move(keypressed, player)
-        draw(player, bullets, enemies)
+        bgmove(bg)
+        draw(player, bullets, enemies, bg)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -118,8 +137,6 @@ def main():
             if event.type == GOT_HIT:
                 draw_text(HIT_TEXT, HITFONT, RED, 70, 300)
     
-
-
     pygame.quit()
 
 if __name__ == "__main__":
